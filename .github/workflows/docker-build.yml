@@ -1,0 +1,39 @@
+---
+name: Build and Push Container Image
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs: {}
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    name: Build and Push Container Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: build-image
+        run: |
+          TIMESTAMP=$(date --utc +%Y-%m-%dT%H%M%S)
+
+          docker build --file Containerfile \
+            --label "org.label-schema.vcs-ref={{ github.sha }}" \
+            --label "org.label-schema.version=$TIMESTAMP" \
+            --tag ghcr.io/jmanero/plex:latest .
+
+          docker tag ghcr.io/jmanero/plex:latest ghcr.io/jmanero/plex:$TIMESTAMP
+          docker push ghcr.io/jmanero/plex:latest ghcr.io/jmanero/plex:$TIMESTAMP
