@@ -36,4 +36,5 @@ jobs:
             --tag ghcr.io/jmanero/plex:latest .
 
           docker tag ghcr.io/jmanero/plex:latest ghcr.io/jmanero/plex:$TIMESTAMP
-          docker push ghcr.io/jmanero/plex:latest ghcr.io/jmanero/plex:$TIMESTAMP
+          docker push ghcr.io/jmanero/plex:$TIMESTAMP
+          docker push ghcr.io/jmanero/plex:latest
