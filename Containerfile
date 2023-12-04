@@ -2,10 +2,9 @@ FROM registry.fedoraproject.org/fedora:38 AS build
 
 COPY plex.repo /etc/yum.repos.d
 RUN dnf install --assumeyes --downloadonly --destdir $(pwd) plexmediaserver
-RUN rpm2archive -n plexmediaserver-*.x86_64.rpm
 
 RUN mkdir package
-RUN tar -xf plexmediaserver-*.x86_64.rpm.tar -C package
+RUN rpm2archive -n plexmediaserver-*.x86_64.rpm | tar -xC package
 
 ## fedora-minimal doesn't have user management executables installed
 RUN useradd --home-dir /var/lib/plexmediaserver --system --shell /sbin/nologin plex
