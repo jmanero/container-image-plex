@@ -1,10 +1,15 @@
 FROM registry.fedoraproject.org/fedora:latest AS build
 
-COPY plex.repo /etc/yum.repos.d
-RUN dnf download --destdir $(pwd) plexmediaserver
+ARG VERSION
+ARG ARTIFACT_URL
+ARG ARTIFACT_CHECKSUM
+
+RUN curl -v -O "$ARTIFACT_URL"
+RUN echo "$ARTIFACT_CHECKSUM $(basename $ARTIFACT_URL)" >checksum
+RUN sha1sum -c checksum
 
 RUN mkdir package
-RUN rpm2archive -n plexmediaserver-*.x86_64.rpm | tar -xC package
+RUN rpm2archive -n "$(basename $ARTIFACT_URL)" | tar -xC package
 
 ## fedora-minimal doesn't have user management executables installed
 RUN useradd --home-dir /var/lib/plexmediaserver --system --shell /sbin/nologin plex
@@ -26,7 +31,10 @@ ENV PLEX_MEDIA_SERVER_INFO_MODEL="$(uname -m)"
 
 VOLUME /var/lib/plexmediaserver
 
-LABEL org.label-schema.vcs-url="https://github.com/jmanero/container-image-plex"
+LABEL org.opencontainers.image.authors="John Manero <https://github.com/jmanero>"
+LABEL org.opencontainers.image.url="https://github.com/jmanero/container-image-plex"
+LABEL org.opencontainers.image.title="Plex Media Server"
+LABEL org.opencontainers.image.description="Plex Media Server on a Fedora minimal base image"
 
 # USER plex
 ENTRYPOINT ["/usr/bin/run.sh"]
